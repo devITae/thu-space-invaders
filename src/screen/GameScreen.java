@@ -125,6 +125,7 @@ public class GameScreen extends Screen {
 	/**
 	 * Set of all items dropped by on screen enemyships.
 	 */
+
 	private Set<entity.Item> items;
 
 	/**
