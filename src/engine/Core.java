@@ -247,12 +247,12 @@ public final class Core {
 				LOGGER.info("Select your difficulty 0 is practice, 1 is easy, 2 is normal, 3 is hard");
 				diff = sc.nextInt();
 				while(diff < 0 || diff > 3){
-					new Sound().backroundmusic();
 					LOGGER.info("Select your difficulty 0 is practice, 1 is easy, 2 is normal, 3 is hard");
 					diff = sc.nextInt();
 				}
 				if(diff == 0) {
 					do {
+						new Sound().backroundmusic();
 						// One extra live every few levels.
 						boolean bonusLife = gameState.getLevel()
 								% EXTRA_LIFE_FRECUENCY == 0
@@ -343,7 +343,7 @@ public final class Core {
 				break;
 			case 5:
 				//Store.
-				currentScreen = new StoreScreen(width, height, FPS);
+				currentScreen = new ShopScreen(width, height, FPS, 1);
 				LOGGER.info("Starting " + WIDTH + "x" + HEIGHT
 						+ " store screen at " + FPS + " fps.");
 				returnCode = frame.setScreen(currentScreen);
