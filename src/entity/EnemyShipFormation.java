@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import engine.*;
+import screen.GameScreen;
 import screen.Screen;
 import engine.DrawManager.SpriteType;
 
@@ -21,7 +22,7 @@ import engine.DrawManager.SpriteType;
 public class EnemyShipFormation implements Iterable<EnemyShip> {
 
 	/** Initial position in the x-axis. */
-	private static final int INIT_POS_X = 20;
+	private static final int INIT_POS_X = Core.getWIDTH() / 2;
 	/** Initial position in the y-axis. */
 	private static final int INIT_POS_Y = 100;
 	/** Distance between ships. */

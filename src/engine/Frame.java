@@ -4,6 +4,7 @@ import java.awt.Insets;
 
 import javax.swing.JFrame;
 
+import screen.GameScreen;
 import screen.Screen;
 
 /**

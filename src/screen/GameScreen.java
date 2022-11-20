@@ -54,6 +54,9 @@ public class GameScreen extends Screen {
 	 */
 	private static final int SEPARATION_LINE_HEIGHT = 40;
 
+
+	private static final int SEPARATION_LINE_WIDTH = Core.getWIDTH() / 2;
+
 	/**
 	 * Current game difficulty settings.
 	 */
@@ -70,6 +73,10 @@ public class GameScreen extends Screen {
 	 * Player's ship.
 	 */
 	private Ship ship;
+
+	private Ship shipR;
+
+	private Ship shipL;
 	/**
 	 * Player's ship width.
 	 */
@@ -175,12 +182,8 @@ public class GameScreen extends Screen {
 		enemyShipFormation = new EnemyShipFormation(this.gameSettings);
 		enemyShipFormation.attach(this);
 		/** You can add your Ship to the code below. */
-
-		switch (Inventory.getcurrentship()) {
-			case 1000 -> this.ship = new Ship(this.width / 2, this.height - 30, Color.GREEN);
-			case 1001 -> this.ship = new Ship(this.width / 2, this.height - 30, Color.RED);
-			case 1002 -> this.ship = new Ship(this.width / 2, this.height - 30, Color.BLUE);
-		}
+		this.shipR = new Ship(this.width / 4, this.height - 30, Color.RED);
+		this.shipL = new Ship(this.width / 4 * 3, this.height - 30, Color.BLUE);
 
 		// Appears each 10-30 seconds.
 		this.enemyShipSpecialCooldown = Core.getVariableCooldown(
@@ -227,27 +230,45 @@ public class GameScreen extends Screen {
 				boolean moveLeft = inputManager.isKeyDown(KeyEvent.VK_LEFT)
 						|| inputManager.isKeyDown(KeyEvent.VK_A);
 
-				boolean isRightBorder_ship = this.ship.getPositionX()
-						+ this.ship.getWidth() + this.ship.getSpeed() > this.width - 1;
-				boolean isLeftBorder_ship = this.ship.getPositionX()
-						- this.ship.getSpeed() < 1;
+				boolean isRightBorder_shipR = this.shipR.getPositionX()
+						+ this.shipR.getWidth() + this.shipR.getSpeed() > this.width - 1;
+				boolean isMiddleLine_shipR = this.shipR.getPositionX()
+						-this.shipR.getSpeed() < this.width / 2 + 1;
+				boolean isMiddleLine_shipL = this.shipL.getPositionX()
+						+ this.shipL.getWidth() + this.shipL.getSpeed() > this.width / 2 - 1;
+				boolean isLeftBorder_shipL = this.shipL.getPositionX()
+						- this.shipL.getSpeed() < 1;
 
-				if (moveRight && !isRightBorder_ship) {
-					this.ship.moveRight();
+
+
+				if (moveRight && !isRightBorder_shipR) {
+					this.shipR.moveRight();
 				}
-				if (moveLeft && !isLeftBorder_ship) {
-					this.ship.moveLeft();
+				if (moveLeft && !isMiddleLine_shipR) {
+					this.shipR.moveLeft();
+				}
+				if (moveRight && !isMiddleLine_shipL){
+					this.shipL.moveRight();
+				}
+				if (moveLeft && !isLeftBorder_shipL){
+					this.shipL.moveLeft();
 				}
 				if (inputManager.isKeyDown(KeyEvent.VK_SPACE))
 					if (this.ship.shoot(this.bullets))
 						this.bulletsShot++;
 
-				if (moveLeft)
-					ship.animctr = 2;
-				else if (moveRight)
-					ship.animctr = 3;
-				else
-					ship.animctr = 1;
+				if (moveLeft) {
+					shipR.animctr = 2;
+					shipL.animctr = 2;
+				}
+				else if (moveRight) {
+					shipR.animctr = 3;
+					shipL.animctr = 3;
+				}
+				else {
+					shipR.animctr = 1;
+					shipL.animctr = 1;
+				}
 			}
 
 			if (this.enemyShipSpecial != null) {
@@ -269,7 +290,8 @@ public class GameScreen extends Screen {
 				this.logger.info("The special ship has escaped");
 			}
 
-			this.ship.update();
+			this.shipR.update();
+			this.shipL.update();
 			this.enemyShipFormation.update();
 
 			switch (Core.getDiff()){
@@ -313,16 +335,8 @@ public class GameScreen extends Screen {
 	 */
 	private void draw() {
 		drawManager.initDrawing(this);
-		drawManager.drawEntity(this.ship, this.ship.getPositionX(), this.ship.getPositionY());
-		if (this.ship.item_number == 1){
-			drawManager.drawimg("item_heart", this.ship.getPositionX()+15, this.ship.getPositionY()-25, 33, 33);
-		}
-		else if (this.ship.item_number == 2){
-			drawManager.drawimg("item_bulletspeed", this.ship.getPositionX()+15, this.ship.getPositionY()-25, 33, 33);
-		}
-		else if (this.ship.item_number == 3){
-			drawManager.drawimg("item_movespeed", this.ship.getPositionX()+15, this.ship.getPositionY()-25, 33, 33);
-		}
+		drawManager.drawEntity(this.shipR, this.shipR.getPositionX(), this.shipR.getPositionY());
+		drawManager.drawEntity(this.shipL, this.shipL.getPositionX(), this.shipL.getPositionY());
 		if (this.enemyShipSpecial != null)
 			drawManager.drawEntity(this.enemyShipSpecial,
 					this.enemyShipSpecial.getPositionX(),
@@ -350,6 +364,7 @@ public class GameScreen extends Screen {
 		drawManager.drawScore(this, this.score);
 		drawManager.drawLives(this, this.lives);
 		drawManager.drawHorizontalLine(this, SEPARATION_LINE_HEIGHT - 1);
+		drawManager.drawVerticalLine(this, SEPARATION_LINE_WIDTH - 1);
 		drawManager.drawCoin(this, this.coin);
 
 		// Countdown to game start.
