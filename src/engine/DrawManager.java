@@ -441,6 +441,12 @@ public final class DrawManager {
 				positionY + 1);
 	}
 
+	public void drawVerticalLine(final Screen screen, final int positionX){
+		backBufferGraphics.setColor(HUDSettingScreen.getScreenColor());
+		backBufferGraphics.drawLine(positionX, 39, positionX, screen.getHeight());
+		backBufferGraphics.drawLine(positionX + 1, 39, positionX + 1
+				, screen.getHeight());
+	}
 	/**
 	 * Draws game title.
 	 *
