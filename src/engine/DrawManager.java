@@ -407,7 +407,7 @@ public final class DrawManager {
 	 * @param screen Screen to draw on.
 	 * @param lives  Current lives.
 	 */
-	public void drawLives(final Screen screen, final int lives) {
+	public void drawLives(final Screen screen, final int lives, final int LR) {
 		backBufferGraphics.setFont(fontRegular);
 		backBufferGraphics.setColor(Color.WHITE);
 		
@@ -422,9 +422,16 @@ public final class DrawManager {
 			backBufferGraphics.drawString("Infin.", 20, 25);	
 			drawEntity(dummyShip, 40 + 35, 10);
 		} else {
-			backBufferGraphics.drawString(Integer.toString(lives), 20, 25);
-			for (int i = 0; i < lives; i++)
-				drawEntity(dummyShip, 40 + 35 * i, 10);
+			if(LR==0) { //left
+				backBufferGraphics.drawString(Integer.toString(lives), 20, 25);
+				for (int i = 0; i < lives; i++)
+					drawEntity(dummyShip, 40 + 35 * i, 10);
+			}
+			if(LR==1) { //right
+				backBufferGraphics.drawString(Integer.toString(lives), 170, 25);
+				for (int i = 0; i < lives; i++)
+					drawEntity(dummyShip, 190 + 35 * i, 10);
+			}
 		}
 	}
 
