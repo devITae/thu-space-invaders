@@ -244,23 +244,11 @@ public class GameScreen extends Screen {
 			this.enemyShipFormation.update();
 			//this.enemyShipFormationL.update();
 			//this.enemyShipFormationR.update();
-			switch (Core.getDiff()){
-				case 1:
-					this.enemyShipFormation.shoot(this.bullets);
-					//this.enemyShipFormationL.shoot(this.bullets);
-					//this.enemyShipFormationR.shoot(this.bullets);
-					break;
-				case 2:
-					this.enemyShipFormation.shootN(this.bulletsN);
-					//this.enemyShipFormationL.shootN(this.bulletsN);
-					//this.enemyShipFormationR.shootN(this.bulletsN);
-					break;
-				case 3:
-					this.enemyShipFormation.shootH(this.bulletsH);
-					//this.enemyShipFormationL.shootH(this.bulletsH);
-					//this.enemyShipFormationR.shootH(this.bulletsH);
-					break;
-			}
+
+			this.enemyShipFormation.shootH(this.bulletsH);
+			//this.enemyShipFormationL.shootH(this.bulletsH);
+			//this.enemyShipFormationR.shootH(this.bulletsH);
+
 
 		}
 		manageCollisions();
