@@ -1042,7 +1042,7 @@ public final class DrawManager {
 		backBufferGraphics.setColor(HUDSettingScreen.getScreenColor());
 		if (number >= 4)
 			if (!bonusLife) {
-				drawCenteredBigString(screen, "Level " + level,
+				drawCenteredBigString(screen, "Get Ready" ,
 						screen.getHeight() / 2
 								+ fontBigMetrics.getHeight() / 3);
 			} else {
@@ -1055,7 +1055,7 @@ public final class DrawManager {
 			drawCenteredBigString(screen, Integer.toString(number),
 					screen.getHeight() / 2 + fontBigMetrics.getHeight() / 3);
 		else
-			drawCenteredBigString(screen, "GO!", screen.getHeight() / 2
+			drawCenteredBigString(screen, "Let's Rock!", screen.getHeight() / 2
 					+ fontBigMetrics.getHeight() / 3);
 	}
 

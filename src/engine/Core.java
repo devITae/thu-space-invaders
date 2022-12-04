@@ -246,15 +246,7 @@ public final class Core {
 				break;
 			case 2:
 					// Game & score
-
-				Scanner sc = new Scanner(System.in);
-				LOGGER.info("Select your difficulty 0 is practice, 1 is easy, 2 is normal, 3 is hard");
-				diff = sc.nextInt();
-				while(diff < 0 || diff > 3){
-					new Sound().backroundmusic();
-					LOGGER.info("Select your difficulty 0 is practice, 1 is easy, 2 is normal, 3 is hard");
-					diff = sc.nextInt();
-				}
+				diff = 3;
 				if(diff == 0) {
 					do {
 						// One extra live every few levels.
