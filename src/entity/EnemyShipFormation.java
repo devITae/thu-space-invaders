@@ -1,11 +1,8 @@
 package entity;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import engine.*;
@@ -179,11 +176,34 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 	/**
 	 * Draws every individual component of the formation.
 	 */
+	/*
+	for (int i = 0; i < hud.getLevel() * 2; ++i) {
+    handler.addObject(new BasicEnemy(r.nextInt(Game.WIDTH - 50), r.nextInt(Game.HEIGHT - 50),
+    ID.BasicEnemy, handler));
+}
+	 */
+
+
+
 	public final void draw() {
-		for (List<EnemyShip> column : this.enemyShips)
-			for (EnemyShip enemyShip : column)
-				drawManager.drawEntity(enemyShip, enemyShip.getPositionX(),
-						enemyShip.getPositionY());
+		Random r = new Random();
+		int var = 0;
+
+		for (int i = 1; i <= 720; i++) {
+			ArrayList ar = new ArrayList<Integer>();
+			int arrive = r.nextInt(4) + 1;
+			if (i == arrive) {
+				for (List<EnemyShip> column : this.enemyShips)
+					for (EnemyShip enemyShip : column)
+						drawManager.drawEntity(enemyShip, enemyShip.getPositionX(),
+								enemyShip.getPositionY());
+				ar.add(i);
+				var++;
+				arrive = r.nextInt(4) + 1 + i;
+			}
+
+
+		}
 	}
 
 	/**
