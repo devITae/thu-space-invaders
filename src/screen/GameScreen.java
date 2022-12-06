@@ -323,12 +323,19 @@ public class GameScreen extends Screen {
 
 	// levelFinished : Gameover + level clear 둘다포함
 	private void level_finish(){
-		if ((this.enemyShipFormation.isEmpty() || (this.livesL <= 0 && this.livesR <= 0)
-				&& !this.levelFinished)) {
-			this.levelFinished = true;
-			this.screenFinishedCooldown.reset();
-			if(this.livesL==0) this.shipL.gameOver();
-			if(this.livesR==0) this.shipR.gameOver();
+		if ((this.enemyShipFormation.isEmpty() || (this.livesL <= 0 && this.livesR <= 0))
+				&& !this.levelFinished) { // 게임이 안끝났는데 적이 다 죽었을 때 || 게임이 안끝났는데 양쪽 다 목숨이 0일 때
+			this.levelFinished = true; // 레벨 끝내기
+			this.screenFinishedCooldown.reset(); // 화면 초기화?
+			if(this.livesL<=0) this.shipL.gameOver();
+			if(this.livesR<=0) this.shipR.gameOver();
+		}
+
+		if ((this.livesL <= 0 || this.livesR <= 0)
+				&& !this.levelFinished) { // 게임이 안끝났는데 둘중 하나 목숨이 0일 때
+			// 어떤 플레이어의 목숨이 0인지 보고 걔만 게임오버 시키기
+			if(this.livesL<=0) this.shipL.gameOver();
+			if(this.livesR<=0) this.shipR.gameOver();
 		}
 
 //		if ((this.enemyShipFormation.isEmpty() || this.livesL != 0 && this.livesR == 0)
@@ -466,7 +473,11 @@ public class GameScreen extends Screen {
 					if (!this.shipL.isDestroyed()) {
 						// Ship이 destroy 되었을 때 처리
 						this.shipL.destroy();
-						this.livesL--;
+						if(this.livesL > 0) this.livesL--;
+						else{
+							this.shipL.setSPEED(0);
+							this.shipL.setSHOOTING_COOLDOWN(2147483647);
+						}
 						this.logger.info("Hit on player ship, " + this.livesL
 								+ " lives remaining.");
 					}
@@ -477,7 +488,11 @@ public class GameScreen extends Screen {
 					if (!this.shipR.isDestroyed()) {
 						// Ship이 destroy 되었을 때 처리
 						this.shipR.destroy();
-						this.livesR--;
+						if(this.livesR > 0) this.livesR--;
+						else{
+							this.shipR.setSPEED(0);
+							this.shipR.setSHOOTING_COOLDOWN(2147483647);
+						}
 						this.logger.info("Hit on player ship, " + this.livesR
 								+ " lives remaining.");
 					}
@@ -504,7 +519,6 @@ public class GameScreen extends Screen {
 						}
 						else {
 							enemyLives--;
-							// 에너미 공격했을 때 상대편의 에너미++
 							enemyShip.setenemyLives(enemyLives);
 							recyclable.add(bullet);
 						}
@@ -534,7 +548,11 @@ public class GameScreen extends Screen {
 					recyclable.add(bullet);
 					if (!this.shipL.isDestroyed()) {
 						this.shipL.destroy();
-						this.livesL--;
+						if(this.livesL > 0) this.livesL--;
+						else{
+							this.shipL.setSPEED(0);
+							this.shipL.setSHOOTING_COOLDOWN(2147483647);
+						}
 						this.logger.info("Hit on player ship, " + this.livesL
 								+ " lives remaining.");
 					}
@@ -543,7 +561,11 @@ public class GameScreen extends Screen {
 					recyclable.add(bullet);
 					if (!this.shipR.isDestroyed()) {
 						this.shipR.destroy();
-						this.livesR--;
+						if(this.livesR > 0) this.livesR--;
+						else{
+							this.shipR.setSPEED(0);
+							this.shipR.setSHOOTING_COOLDOWN(2147483647);
+						}
 						this.logger.info("Hit on player ship, " + this.livesR
 								+ " lives remaining.");
 					}
@@ -585,7 +607,11 @@ public class GameScreen extends Screen {
 					recyclable.add(bullet);
 					if (!this.shipL.isDestroyed()) {
 						this.shipL.destroy();
-						this.livesL--;
+						if(this.livesL > 0) this.livesL--;
+						else{
+							this.shipL.setSPEED(0);
+							this.shipL.setSHOOTING_COOLDOWN(2147483647);
+						}
 						this.logger.info("Hit on player ship, " + this.livesL
 								+ " lives remaining.");
 					}
@@ -620,7 +646,11 @@ public class GameScreen extends Screen {
 					recyclable.add(bullet);
 					if (!this.shipR.isDestroyed()) {
 						this.shipR.destroy();
-						this.livesR--;
+						if(this.livesR > 0) this.livesR--;
+						else{
+							this.shipR.setSPEED(0);
+							this.shipR.setSHOOTING_COOLDOWN(2147483647);
+						}
 						this.logger.info("Hit on player ship, " + this.livesR
 								+ " lives remaining.");
 					}

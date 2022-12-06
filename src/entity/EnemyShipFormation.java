@@ -616,6 +616,6 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 	 * @return True when last one ships have been leaved.
 	 */
 	public final boolean isLast() {
-		return this.shipCount == 1;
+		return this.shipCount == 0;
 	}
 }
