@@ -206,7 +206,6 @@ public final class FileManager {
 			bufferedReader = new BufferedReader(new InputStreamReader(
 					inputStream, Charset.forName("UTF-8")));
 
-			logger.info("Loading user high scores.");
 
 			Score highScore = null;
 			String name = bufferedReader.readLine();
@@ -229,7 +228,6 @@ public final class FileManager {
 
 		} catch (FileNotFoundException e) {
 			// loads default if there's no user scores.
-			logger.info("Loading default high scores.");
 			highScores = loadDefaultHighScores();
 		} finally {
 			if (bufferedReader != null)

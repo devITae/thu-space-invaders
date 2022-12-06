@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import engine.*;
+import screen.GameScreen;
 import screen.Screen;
 import engine.DrawManager.SpriteType;
 
@@ -21,7 +22,7 @@ import engine.DrawManager.SpriteType;
 public class EnemyShipFormation implements Iterable<EnemyShip> {
 
 	/** Initial position in the x-axis. */
-	private static final int INIT_POS_X = 20;
+	private static final int INIT_POS_X = Core.getWIDTH() / 2;
 	/** Initial position in the y-axis. */
 	private static final int INIT_POS_Y = 100;
 	/** Distance between ships. */
@@ -212,117 +213,134 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 					this.height<screen.getHeight()-BOTTOM_MARGIN;
 			boolean isAtBottom = positionY
 					+ this.height > screen.getHeight() - BOTTOM_MARGIN;
-			boolean isAtRightSide = positionX
-					+ this.width >= screen.getWidth() - SIDE_MARGIN;
-			boolean isAtLeftSide = positionX <= SIDE_MARGIN;
-			boolean isAtHorizontalAltitude = positionY % DESCENT_DISTANCE == 0;
 
-			if (currentDirection == Direction.DOWN) {
-				if (isAtHorizontalAltitude)
-					if (previousDirection == Direction.RIGHT) {
-						currentDirection = Direction.LEFT;
-						this.logger.info("Formation now moving left 1");
-					} else {
-						currentDirection = Direction.RIGHT;
-						this.logger.info("Formation now moving right 2");
-					}
-			} else if (currentDirection == Direction.LEFT) {
-				if (isAtLeftSide)
-					if (!isAtBottom && movementY != 0) {
-						previousDirection = currentDirection;
-						currentDirection = Direction.DOWN;
-						this.logger.info("Formation now moving down 3");
-					} else {
-						currentDirection = Direction.RIGHT;
-						this.logger.info("Formation now moving right 4");
-					}
-			} else {
-				if (isAtRightSide)
-					if (!isAtBottom && movementY != 0) {
-						previousDirection = currentDirection;
-						currentDirection = Direction.DOWN;
-						this.logger.info("Formation now moving down 5");
-					} else {
-						currentDirection = Direction.LEFT;
-						this.logger.info("Formation now moving left 6");
-					}
-			}
+			setDirection(isAtBottom, movementY);
 
-			if (currentDirection == Direction.RIGHT)
-				movementX = X_SPEED;
-			else if (currentDirection == Direction.LEFT)
-				movementX = -X_SPEED;
-			else
-				movementY = Y_SPEED;
+			int[] movement = xyMovement(currentDirection, movementX, movementY);
+			movementX =  movement[0];
+			movementY =  movement[1];
 
 			positionX += movementX;
 			positionY += movementY;
 
 			// Cleans explosions.
-			List<EnemyShip> destroyed;
-			for (List<EnemyShip> column : this.enemyShips) {
-				destroyed = new ArrayList<EnemyShip>();
-				for (EnemyShip ship : column) {
-					if (ship != null && ship.isDestroyed()) {
-						destroyed.add(ship);
-						this.logger.info("Removed enemy "
-								+ column.indexOf(ship) + " from column "
-								+ this.enemyShips.indexOf(column));
-					}
-				}
-				column.removeAll(destroyed);
+			explosionsClean();
+
+			enemyShipMove(isAtTop, isAtBottom, movementX, movementY);
+
+			changeEnemyShipColors();
+		}
+	}
+
+	private void setDirection(boolean isAtBottom, int movementY) {
+		boolean isAtRightSide = positionX
+				+ this.width >= screen.getWidth() - SIDE_MARGIN;
+		boolean isAtLeftSide = positionX <= SIDE_MARGIN;
+		boolean isAtHorizontalAltitude = positionY % DESCENT_DISTANCE == 0;
+		if (currentDirection == Direction.DOWN && isAtHorizontalAltitude) {
+			if (previousDirection == Direction.RIGHT) {
+				currentDirection = Direction.LEFT;
+				this.logger.info("Formation now moving left 1");
+			} else {
+				currentDirection = Direction.RIGHT;
+				this.logger.info("Formation now moving right 2");
 			}
 
-			for (List<EnemyShip> column : this.enemyShips)
-				for (EnemyShip enemyShip : column) {
-					if(isLast()){
-						if(!isAtTop) {
-							movementY = -30;
-							enemyShip.move(movementX, movementY);
-						}
-						else if(!isAtBottom){
-							movementY = (int) (Math.random() * Y_SPEED + Y_SPEED);
-							enemyShip.move(movementX,movementY);
-						}
-					}else {
-						if (!isAtBottom) {
-							int randomPlace = (int) (Math.random() * column.size() - 1);
-							movementY = 1;
-							if (Math.random() < 0.70) {
-								if (randomPlace < enemyShips.size()) {
-									if (enemyShips.get(randomPlace) == column && column.get(column.size() - 1) == enemyShip) {
-										movementY = (int) (Math.random() * Y_SPEED + Y_SPEED);
-									}
-								}
-							} else {
-								if (enemyShips.get(enemyShips.size() - 1) == column && column.get(column.size() - 1) == enemyShip) {
+		} else if (currentDirection == Direction.LEFT && isAtLeftSide) {
+			if (!isAtBottom && movementY != 0) {
+				previousDirection = currentDirection;
+				currentDirection = Direction.DOWN;
+				this.logger.info("Formation now moving down 3");
+			} else {
+				currentDirection = Direction.RIGHT;
+				this.logger.info("Formation now moving right 4");
+			}
+		} else {
+			if (isAtRightSide)
+				if (!isAtBottom && movementY != 0) {
+					previousDirection = currentDirection;
+					currentDirection = Direction.DOWN;
+					this.logger.info("Formation now moving down 5");
+				} else {
+					currentDirection = Direction.LEFT;
+					this.logger.info("Formation now moving left 6");
+				}
+		}
+	}
+	
+	private void changeEnemyShipColors(){
+		for (List<EnemyShip> column : this.enemyShips) {
+			for (EnemyShip enemyShip : column) {
+				enemyShip.setColor(Color.white); //마지막줄 남으면 더이상 색 변화 x
+				enemyShip.changeColor_G(enemyShip.getEnemyLives()); //목숨 여러개인 적 색상 변화
+			}
+		}
+		int randomPlace_r = (int) (Math.random() * enemyShips.size() - 1);
+		int randomPlace_c = (int) (Math.random() * enemyShips.get(randomPlace_r).size() - 1);
+		if(this.shipCount>nShipsWide) {
+			if (enemyShips.get(randomPlace_r).get(randomPlace_c) != null)
+				enemyShips.get(randomPlace_r).get(randomPlace_c).changeColor();
+		}
+	}
+	
+	private int[] xyMovement(Direction currentDirection, int movementX, int movementY) {
+		if (currentDirection == Direction.RIGHT)
+			movementX = X_SPEED;
+		else if (currentDirection == Direction.LEFT)
+			movementX = -X_SPEED;
+		else
+			movementY = Y_SPEED;
+		return new int[]{movementX, movementY};
+	}
+	
+	private void explosionsClean() {
+		List<EnemyShip> destroyed;
+		for (List<EnemyShip> column : this.enemyShips) {
+			destroyed = new ArrayList<EnemyShip>();
+			for (EnemyShip ship : column) {
+				if (ship != null && ship.isDestroyed()) {
+					destroyed.add(ship);
+					this.logger.info("Removed enemy "
+							+ column.indexOf(ship) + " from column "
+							+ this.enemyShips.indexOf(column));
+				}
+			}
+			column.removeAll(destroyed);
+		}
+	}
+	
+	private void enemyShipMove(boolean isAtTop, boolean isAtBottom, int movementX, int movementY) {
+		for (List<EnemyShip> column : this.enemyShips)
+			for (EnemyShip enemyShip : column) {
+				if(isLast()){
+					if(!isAtTop) {
+						movementY = -30;
+						enemyShip.move(movementX, movementY);
+					}
+					else if(!isAtBottom){
+						movementY = (int) (Math.random() * Y_SPEED + Y_SPEED);
+						enemyShip.move(movementX,movementY);
+					}
+				}else {
+					if (!isAtBottom) {
+						int randomPlace = (int) (Math.random() * column.size() - 1);
+						movementY = 1;
+						if (Math.random() < 0.70) {
+							if (randomPlace < enemyShips.size()) {
+								if (enemyShips.get(randomPlace) == column && column.get(column.size() - 1) == enemyShip) {
 									movementY = (int) (Math.random() * Y_SPEED + Y_SPEED);
 								}
 							}
+						} else {
+							if (enemyShips.get(enemyShips.size() - 1) == column && column.get(column.size() - 1) == enemyShip) {
+								movementY = (int) (Math.random() * Y_SPEED + Y_SPEED);
+							}
 						}
-						enemyShip.move(movementX, movementY);
-						enemyShip.update();
 					}
+					enemyShip.move(movementX, movementY);
+					enemyShip.update();
 				}
-
-			//마지막줄 남으면 더이상 색 변화 x
-			for (List<EnemyShip> column : this.enemyShips) {
-				for (EnemyShip enemyShip : column)
-					enemyShip.setColor(Color.white);
 			}
-
-			int randomPlace_r = (int) (Math.random() * enemyShips.size() - 1);
-			int randomPlace_c = (int) (Math.random() * enemyShips.get(randomPlace_r).size() - 1);
-			if(this.shipCount>nShipsWide) {
-				if (enemyShips.get(randomPlace_r).get(randomPlace_c) != null)
-					enemyShips.get(randomPlace_r).get(randomPlace_c).changeColor();
-			}
-			//목숨 여러개인 적 색상 변화
-			for (List<EnemyShip> column : this.enemyShips) {
-				for (EnemyShip enemyShip : column)
-					 enemyShip.changeColor_G(enemyShip.getEnemyLives());
-			}
-		}
 	}
 
 	/**
@@ -348,7 +366,6 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 		for (int index : emptyColumns) {
 			this.enemyShips.remove(index);
 			logger.info("Removed column " + index);
-
 		}
 
 		int leftMostPoint = 0;
@@ -417,48 +434,31 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 			}
 		}
 	}
+	public final void setShoot(final Set bullets, EnemyShip shooter, int max) {
+		for(int i=0; i<=max; i++){
+			bullets.add(BulletPool.getBulletN(shooter.getPositionX()
+					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED, i));
+			bullets.add(BulletPool.getBulletN(shooter.getPositionX()
+					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED * 2, i));
+		}
+	}
 
 	public final void shootN(final Set<BulletN> bulletsN) {
 		// For now, only ships in the bottom row are able to shoot.
 		int index = (int) (Math.random() * this.shooters.size());
 		EnemyShip shooter = this.shooters.get(index);
 		if (isLast()) { // The last enemy can get the all ShootPattern.
-			bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED,0));
-			bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED * 2,0));
-			bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED,1));
-			bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED * 2,1));
-			bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED,2));
-			bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED * 2,2));
+			setShoot(bulletsN, shooter, 2);
 		}
 		else if (this.shootingCooldown.checkFinished()) {
 			new Sound().bulletsound();
 			this.shootingCooldown.reset();
 			float ShootPattern = (float)(Math.round(Math.random()*10)/10.0);
 			if (isLast()) { // The last enemy can get the all ShootPattern.
-				bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-						+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED,0));
-				bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-						+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED * 2,0));
-				bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-						+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED,1));
-				bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-						+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED * 2,1));
-				bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-						+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED,2));
-				bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-						+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED * 2,2));
+				setShoot(bulletsN, shooter, 2);
 			}
 			else if(ShootPattern<=0.4) {//The Enemy of double Bullet Type
-				bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-						+ shooter.width / 2, shooter.getPositionY(),BULLET_SPEED,0));
-				bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
-						+ shooter.width / 2, shooter.getPositionY(),BULLET_SPEED* 2,0));
+				setShoot(bulletsN, shooter, 0);
 			}
 			else if(0.4 < ShootPattern && ShootPattern < 0.7) {//shoot double direction
 				bulletsN.add(BulletPool.getBulletN(shooter.getPositionX()
@@ -478,18 +478,7 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 		int index = (int) (Math.random() * this.shooters.size());
 		EnemyShip shooter = this.shooters.get(index);
 		if (isLast()) { // The last enemy can get the all ShootPattern.
-			bulletsH.add(BulletPool.getBulletH(shooter.getPositionX()
-					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED,0));
-			bulletsH.add(BulletPool.getBulletH(shooter.getPositionX()
-					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED * 2,0));
-			bulletsH.add(BulletPool.getBulletH(shooter.getPositionX()
-					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED,1));
-			bulletsH.add(BulletPool.getBulletH(shooter.getPositionX()
-					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED * 2,1));
-			bulletsH.add(BulletPool.getBulletH(shooter.getPositionX()
-					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED,2));
-			bulletsH.add(BulletPool.getBulletH(shooter.getPositionX()
-					+ shooter.width / 2, shooter.getPositionY(), BULLET_SPEED * 2,2));
+			setShoot(bulletsH, shooter, 2);
 		}
 		else if (this.shootingCooldown.checkFinished()) {
 
@@ -627,6 +616,6 @@ public class EnemyShipFormation implements Iterable<EnemyShip> {
 	 * @return True when last one ships have been leaved.
 	 */
 	public final boolean isLast() {
-		return this.shipCount == 1;
+		return this.shipCount == 0;
 	}
 }
